@@ -279,3 +279,71 @@ It moves to:
 Then next cycle → Timers phase
 
 So order becomes predictable.
+
+
+// =====================================================
+// 11. process.nextTick()  (VERY IMPORTANT)
+// =====================================================
+
+// process.nextTick() is a special function in Node.
+
+// It executes:
+// AFTER current operation
+// BUT BEFORE the event loop continues to next phase.
+
+// It does NOT wait for:
+// - Timers phase
+// - Poll phase
+// - Check phase
+
+// It runs IMMEDIATELY after current call stack is empty.
+
+
+// Example:
+
+console.log("Start");
+
+process.nextTick(() => {
+    console.log("nextTick");
+});
+
+console.log("End");
+
+
+// Output:
+// Start
+// End
+// nextTick
+
+
+// Why?
+
+// nextTick is placed in a special queue called:
+// "nextTick queue"
+
+// This queue is processed:
+// BEFORE the event loop continues.
+
+
+// =====================================================
+// COMPARISON TEST
+// =====================================================
+
+setTimeout(() => console.log("timeout"), 0);
+
+setImmediate(() => console.log("immediate"));
+
+process.nextTick(() => console.log("nextTick"));
+
+
+// What will be output?
+
+// Correct Output:
+// nextTick
+// timeout (or immediate)
+// immediate (or timeout)
+
+
+// IMPORTANT:
+// nextTick ALWAYS runs first.
+
