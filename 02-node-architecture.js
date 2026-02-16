@@ -201,3 +201,81 @@ console.log("End");
 // setTimeout → runs in Timers phase
 // setImmediate → runs in Check phase
 
+
+For this code:
+
+setImmediate(() => {
+    console.log("Immediate");
+});
+
+setTimeout(() => {
+    console.log("Timeout");
+}, 0);
+
+✅ The output is NOT guaranteed.
+
+It can be:
+
+Timeout
+Immediate
+
+
+OR
+
+Immediate
+Timeout
+
+
+Because:
+
+When this code runs at the top level (not inside I/O callback),
+
+Node has some internal timing differences during first event loop cycle.
+
+So execution order depends on:
+
+How fast the script finishes
+
+System performance
+
+When timers become ready
+
+That’s why Node docs say:
+
+Execution order between setTimeout(0) and setImmediate() is non-deterministic at top level.
+
+If you place them inside an I/O callback:
+
+const fs = require("fs");
+
+fs.readFile("test.txt", () => {
+    setTimeout(() => {
+        console.log("Timeout");
+    }, 0);
+
+    setImmediate(() => {
+        console.log("Immediate");
+    });
+});
+
+✅ Now output is ALWAYS:
+Immediate
+Timeout
+
+🧠 Why?
+
+Because:
+
+Inside I/O callback:
+
+Event loop is in Poll phase.
+
+After Poll phase finishes:
+
+It moves to:
+
+👉 Check phase (setImmediate)
+
+Then next cycle → Timers phase
+
+So order becomes predictable.
