@@ -171,6 +171,25 @@ console.log("---- NON-BLOCKING VERSION END ----");
 
 // This proves Node is NON-BLOCKING.
 
+🧠 WHY DOES THIS HAPPEN?
+Because Node uses:
+Single JavaScript thread
+Event Loop
+libuv
+Thread pool
+When you use:
+fs.readFileSync()
+
+→ JavaScript thread is blocked
+→ Event loop cannot move forward
+
+When you use:
+fs.readFile()
+
+→ Task goes to background
+→ JS thread is free
+→ Event loop continues
+
 
 // ==========================================
 // 6. NODE ARCHITECTURE (High-Level)
