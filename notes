@@ -1,0 +1,214 @@
+// ==========================================
+// 1. WHAT IS NODE.JS
+// ==========================================
+
+// Node.js is a JavaScript runtime environment
+// that allows JavaScript to run outside the browser.
+
+// It is built on V8 engine of Google Chrome.
+
+// IMPORTANT:
+// Node.js is NOT:
+// ❌ A programming language
+// ❌ A framework
+
+// Node.js IS:
+// ✅ A runtime environment
+
+
+// ==========================================
+// 2. PROOF THAT NODE RUNS JS OUTSIDE BROWSER
+// ==========================================
+
+// This code runs without browser:
+
+console.log("Node is running outside browser!");
+
+
+// In browser you have:
+console.log(typeof window);  // In Node → undefined
+
+// In Node you have:
+console.log(typeof global);  // object
+
+// Browser global object = window
+// Node global object = global
+
+
+// ==========================================
+// 3. WHY NODE.JS WAS CREATED
+// ==========================================
+
+// Before Node.js, backend was written using:
+// PHP, Java, Python
+
+// Problem:
+// - Different language for frontend & backend
+// - Blocking I/O model (slow under heavy traffic)
+
+// Node.js was created in 2009 by Ryan Dahl
+// Goal:
+// - Use JavaScript everywhere
+// - Handle thousands of concurrent connections
+// - Use non-blocking I/O
+
+
+// ==========================================
+// 4. SINGLE-THREADED NATURE
+// ==========================================
+
+// Node executes JavaScript in a single thread.
+
+// Example:
+
+console.log("Start");
+
+setTimeout(() => {
+    console.log("Timer finished");
+}, 2000);
+
+console.log("End");
+
+// Output:
+// Start
+// End
+// Timer finished
+
+// Even though setTimeout takes 2 seconds,
+// Node does NOT block execution.
+
+// This proves:
+// Node is NON-BLOCKING
+
+
+// ==========================================
+// 5. BLOCKING vs NON-BLOCKING (DETAILED)
+// ==========================================
+
+const fs = require("fs");
+
+// ------------------------------------------
+// CASE 1: BLOCKING (SYNCHRONOUS)
+// ------------------------------------------
+
+console.log("---- BLOCKING VERSION START ----");
+
+try {
+    const dataSync = fs.readFileSync("test.txt", "utf-8");
+    console.log("File Data (Sync):", dataSync);
+} catch (err) {
+    console.log("Error reading file (Sync):", err.message);
+}
+
+console.log("---- BLOCKING VERSION END ----");
+
+
+// ==========================================
+// WHAT HAPPENS INTERNALLY?
+// ==========================================
+
+// 1. readFileSync goes to OS.
+// 2. Node WAITS until file is completely read.
+// 3. Execution is paused.
+// 4. Only after file finishes → next line runs.
+
+
+// ==========================================
+// EXPECTED OUTPUT ORDER (If file exists)
+// ==========================================
+
+// ---- BLOCKING VERSION START ----
+// File Data (Sync): <file content>
+// ---- BLOCKING VERSION END ----
+
+
+// IMPORTANT:
+// Even if file takes 5 seconds,
+// NOTHING runs after readFileSync until it finishes.
+
+
+// ------------------------------------------
+// CASE 2: NON-BLOCKING (ASYNCHRONOUS)
+// ------------------------------------------
+
+console.log("---- NON-BLOCKING VERSION START ----");
+
+fs.readFile("test.txt", "utf-8", (err, dataAsync) => {
+    if (err) {
+        console.log("Error reading file (Async):", err.message);
+        return;
+    }
+
+    console.log("File Data (Async):", dataAsync);
+});
+
+console.log("---- NON-BLOCKING VERSION END ----");
+
+
+// ==========================================
+// WHAT HAPPENS INTERNALLY?
+// ==========================================
+
+// 1. readFile is sent to libuv.
+// 2. libuv sends file task to thread pool.
+// 3. Node DOES NOT WAIT.
+// 4. Execution continues immediately.
+// 5. When file is ready → callback pushed to event loop queue.
+// 6. Event loop executes callback.
+
+
+// ==========================================
+// EXPECTED OUTPUT ORDER (If file exists)
+// ==========================================
+
+// ---- NON-BLOCKING VERSION START ----
+// ---- NON-BLOCKING VERSION END ----
+// File Data (Async): <file content>
+
+
+// NOTICE:
+// "END" prints BEFORE file data.
+
+// This proves Node is NON-BLOCKING.
+
+
+// ==========================================
+// 6. NODE ARCHITECTURE (High-Level)
+// ==========================================
+
+// Node contains:
+
+// 1. V8 Engine → Executes JS
+// 2. Event Loop → Handles async operations
+// 3. Libuv → Handles I/O operations
+// 4. Thread Pool → For heavy tasks (file, crypto, DNS)
+
+
+// ==========================================
+// 7. WHERE NODE IS USED
+// ==========================================
+
+// ✅ REST APIs
+// ✅ Backend for React apps
+// ✅ Real-time apps (chat apps)
+// ✅ Streaming services
+// ✅ Microservices
+
+// ❌ Not ideal for heavy CPU computation
+
+
+// ==========================================
+// 8. INTERVIEW QUESTIONS FROM THIS TOPIC
+// ==========================================
+
+// Q1: What is Node.js?
+// → A runtime environment that allows JS to run outside browser.
+
+// Q2: Is Node single-threaded?
+// → Yes for JS execution, but uses background threads for I/O.
+
+// Q3: Why is Node fast?
+// → V8 engine + Non-blocking I/O + Event-driven architecture.
+
+// Q4: Why is window not defined in Node?
+// → Because Node runs outside browser and has no DOM.
