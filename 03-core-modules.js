@@ -304,6 +304,7 @@ How does Node handle multiple HTTP requests?
 You answer:
 Node uses an event-driven, non-blocking architecture. The OS manages socket connections, and Node’s event loop processes request callbacks sequentially but very quickly, giving the illusion of concurrency without creating multiple threads.
 That answer = strong backend understanding.
+    
 // =======================================================
 // 6. PROCESS OBJECT
 // =======================================================
@@ -323,7 +324,43 @@ console.log("Arguments:", process.argv);
 // Exit process manually
 // process.exit();
 
+🔥 Why process Does Not Need require()
 
+Because Node wraps your file like this internally:
+(function (exports, require, module, __filename, __dirname) {
+    // your code
+});
+And it also injects:
+process
+console
+Buffer
+setTimeout
+So they are global.
+
+🎯 Interview Questions From process
+🔹 Q1: What is process in Node?
+It is a global object representing the currently running Node.js process.
+
+🔹 Q2: How do you read environment variables?
+process.env.VARIABLE_NAME
+
+🔹 Q3: What is process.argv?
+An array containing command-line arguments passed to the Node process.
+
+🔹 Q4: Difference between process.platform and os.platform()?
+process.platform → runtime info
+os.platform() → system-level OS info
+
+🔹 Q5: How do you handle uncaught errors globally?
+process.on("uncaughtException", handler);
+
+🧠 Important Interview Answer
+If asked:
+Should we prevent crash using process.on('uncaughtException')?
+Correct answer:
+We can log the error inside uncaughtException, but we should exit the process afterward because the application may be in an inconsistent state.
+That’s a strong backend answer.
+    
 // =======================================================
 // 7. CRYPTO MODULE (Basic Awareness)
 // =======================================================
