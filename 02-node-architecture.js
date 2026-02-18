@@ -347,3 +347,16 @@ process.nextTick(() => console.log("nextTick"));
 // IMPORTANT:
 // nextTick ALWAYS runs first.
 
+//MENTAL MODEL
+Synchronous code
+↓
+process.nextTick
+↓
+Promise microtasks
+↓
+Timers phase (setTimeout)
+↓
+Poll phase (I/O)
+↓
+Check phase (setImmediate)
+
