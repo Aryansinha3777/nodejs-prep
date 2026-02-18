@@ -305,3 +305,4 @@ console.log("SHA256 Hash:", hash);
 | File system        | libuv thread pool |
 | Crypto / CPU-heavy | libuv thread pool |
 | JS execution       | Main thread       |
+
