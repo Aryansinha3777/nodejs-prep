@@ -32,7 +32,36 @@ fs.readFile("test.txt", "utf-8", (err, data) => {
 // ❓ Why should we avoid readFileSync in production?
 // → Because it blocks the event loop.
 
+If interviewer asks:
 
+How does async fs.readFile work internally?
+
+Answer:
+
+fs.readFile delegates file reading to libuv’s thread pool. The callback is stored in the task object. Once the file reading completes, libuv pushes the callback to the event loop’s I/O queue. When the call stack is empty, the event loop executes the callback with error and data arguments.
+That answer = advanced Node understanding.
+
+
+Why should we avoid fs.readFileSync in production?
+
+Strong answer:
+Because Node.js runs JavaScript on a single thread. Using synchronous file operations blocks the event loop, preventing other incoming requests from being processed. This severely impacts scalability and performance under high load.
+That is backend-level thinking.
+
+
+Let’s understand the real reason Node provides readFileSync.
+
+🔥 Why Does Node Provide readFileSync?
+1️⃣ For Startup Configuration (Very Common)
+
+When your server starts:
+const config = fs.readFileSync("config.json", "utf-8");
+
+At startup:
+No users are connected yet
+Blocking doesn’t hurt
+It’s simple and safe
+    
 // ----------- WRITE FILE -----------
 
 fs.writeFile("output.txt", "Hello Node!", (err) => {
@@ -42,6 +71,7 @@ fs.writeFile("output.txt", "Hello Node!", (err) => {
     }
     console.log("File written successfully");
 });
+
 
 
 // ----------- APPEND FILE -----------
@@ -76,6 +106,60 @@ console.log("Joined path:", joinedPath);
 // → Because it handles OS-specific separators correctly.
 
 
+If I write:
+path.join("/users", "../admin", "file.txt")
+What will be the final path?
+
+Step 1:
+
+Start with:
+/users
+Step 2:
+Add:
+../admin
+.. means:
+Go one directory UP.
+So:
+/users
+Go up one level → /
+Then enter admin
+So now we are at:
+/admin
+Step 3:
+Add:
+file.txt
+Final result:
+/admin/file.txt
+
+//important
+Given:
+path.resolve("users", "/admin", "data.txt");
+
+🔥 How resolve() Works
+
+resolve() processes from right → left
+and stops when it finds an absolute path.
+
+Step 1: Start from right
+"data.txt"
+Step 2: Move left
+"/admin"
+This is an absolute path (starts with /).
+💥 As soon as resolve() sees an absolute path,
+it ignores everything before it.
+So "users" is completely ignored.
+Step 3: Combine
+/admin + data.txt
+Final result:
+/admin/data.txt
+
+🔥 Compare With join()
+If you used:
+path.join("users", "/admin", "data.txt");
+Output would be:
+users/admin/data.txt
+Because join() does NOT discard previous segments.
+    
 // =======================================================
 // 3. OS MODULE
 // =======================================================
@@ -112,6 +196,24 @@ emitter.emit("greet", "Aryan");
 // Output:
 // Hello Aryan
 
+EventEmitter is a class that allows:
+Creating custom events
+Attaching listeners
+Triggering events
+
+//important
+const EventEmitter = require("events");
+The events module exports a class called EventEmitter.You are importing that class.
+In essence, this line makes the EventEmitter class available for use in your code, so you can create instances that can emit() named events and have functions on() (or addListener()) that listen for those events and execute a callback function when they occur. 
+
+const emitter = new EventEmitter();
+Now emitter is an object that can:
+Register events
+Emit events
+Remove events
+Think of it as an event manager.
+
+    
 // Interview:
 // ❓ What is event-driven architecture?
 // → Code reacts to events instead of sequential flow.
@@ -197,3 +299,9 @@ console.log("SHA256 Hash:", hash);
 // crypto → Security & hashing
 
 
+| Operation Type     | Handled By        |
+| ------------------ | ----------------- |
+| HTTP / Network I/O | OS async I/O      |
+| File system        | libuv thread pool |
+| Crypto / CPU-heavy | libuv thread pool |
+| JS execution       | Main thread       |
