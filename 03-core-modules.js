@@ -246,7 +246,64 @@ server.listen(3000, () => {
 // ❓ What are req and res?
 // → Request object and Response object.
 
+🔹 2️⃣ http.createServer()
+const server = http.createServer((req, res) => { ... });
+This creates an HTTP server.
+It takes a callback function.
+That callback runs:
+👉 Every time a client makes a request.
+    
+🔥 That Callback Is Actually an Event Listener
+Internally, this is similar to:
+server.on("request", callback);
+Because HTTP server is built on EventEmitter.
+When a request comes:
+It emits "request" event.
+That’s why the callback receives:
+(req, res)
 
+
+🧠 Internal Flow When You Open Browser
+
+Browser sends HTTP request
+OS receives request
+Node’s event loop detects socket readiness
+HTTP server emits "request" event
+Your callback runs
+Response is sent
+No new thread per request.
+Event-driven.
+
+🔥 What Actually Happens When 5 Users Hit Server
+const server = http.createServer((req, res) => {
+    res.end("Hello");
+});
+
+
+Important:
+
+👉 Only ONE server object is created.
+👉 Only ONE JavaScript thread exists.
+👉 No new thread per request.
+
+🧠 Step-by-Step Internals
+
+When 5 users hit at the same time:
+OS receives 5 TCP connections.
+OS keeps track of all sockets.
+Node registers these sockets in the event loop.
+When any socket has data ready:
+Event loop picks it
+Executes your callback
+Sends response
+Moves to next ready socket
+
+🎯 Backend Interview-Level Answer
+If asked:
+How does Node handle multiple HTTP requests?
+You answer:
+Node uses an event-driven, non-blocking architecture. The OS manages socket connections, and Node’s event loop processes request callbacks sequentially but very quickly, giving the illusion of concurrency without creating multiple threads.
+That answer = strong backend understanding.
 // =======================================================
 // 6. PROCESS OBJECT
 // =======================================================
