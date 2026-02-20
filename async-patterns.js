@@ -439,6 +439,48 @@ read();
 
 This is common in real backend systems.
 
+//imp
+🧩 Step 1 — What Is fs.readFile?
+fs.readFile is a callback-based API.
+It works like this:
+fs.readFile("test.txt", "utf-8", (err, data) => {
+    if (err) throw err;
+    console.log(data);
+});
+
+Notice:
+It does NOT return the file content.
+It expects a callback.
+It follows error-first callback pattern.
+So you cannot do:
+const data = fs.readFile(...); // ❌ Won’t work
+Because it returns undefined.
+
+🔥 Problem
+We want to use modern:
+await something();
+But fs.readFile does NOT return a Promise.
+So we need to convert it.
+🧠 Step 2 — What Is util.promisify?
+promisify is a function from Node’s util module.
+
+It converts:
+
+callback-style function
+into:
+Promise-based function
+🔬 What This Line Does
+const readFilePromise = promisify(fs.readFile);
+
+It converts:
+fs.readFile(path, encoding, callback)
+
+into:
+readFilePromise(path, encoding) → returns Promise
+So now this works:
+const data = await readFilePromise("test.txt", "utf-8");
+Because it returns a Promise.
+    
 =======================================================
 🔥 10️⃣ Common Async Mistake
 =======================================================
@@ -453,48 +495,49 @@ console.log(test());
 Promise { <pending> }
 
 Why?
-
 Because async functions ALWAYS return a Promise.
 
+✅ Correct Way (Using Promise)
+You must wrap setTimeout inside a Promise:
+async function test() {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve("Hello");
+        }, 1000);
+    });
+}
+
+test().then(console.log);
+✅ Output after 1 sec:
+Hello
 =======================================================
 🧠 Production-Level Understanding
 =======================================================
 
 When 1000 users hit your server:
-
 Each request handler is async
-
 Node doesn’t create 1000 threads
-
 It offloads I/O to OS
-
 When data is ready → callback/promise resumes
-
 This is why Node scales.
 
 =======================================================
 🎯 INTERVIEW QUESTIONS
 =======================================================
 Q1: Difference between callback and promise?
-
 → Promise avoids callback hell and improves error handling.
 
 Q2: Difference between Promise and async/await?
-
 → async/await is syntactic sugar over promises.
 
 Q3: Why Promise runs before setTimeout?
-
 → Microtask queue priority.
 
 Q4: What happens if you forget await?
-
 → You get a pending Promise.
 
 Q5: Does async/await block event loop?
-
 → No.
 
 Q6: Difference between Promise.all and Promise.allSettled?
-
 → all fails fast, allSettled returns all results.
