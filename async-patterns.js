@@ -56,7 +56,7 @@ function fetchData(callback) {
         const success = true;
 
         if (!success) {
-            return callback(new Error("Something went wrong"), null);
+            return callback(new Error("Something went wrong"), null); // return bcoz without it both calls will run(niche wala)
         }
 
         callback(null, "Data received");
@@ -72,12 +72,10 @@ fetchData((err, data) => {
     console.log("Success:", data);
 });
 🧠 Important Pattern
-
 Node uses:
-
 callback(error, result)
-
 This is called Error-First Callback Pattern
+
 
 🚨 Callback Hell Problem
 setTimeout(() => {
@@ -95,29 +93,25 @@ setTimeout(() => {
 }, 1000);
 
 This is:
-
 Hard to read
-
 Hard to debug
-
 Hard to scale
 
 Solution? → Promises.
 
+What is Zalgo problem?
+A function that sometimes executes callback synchronously and sometimes asynchronously.
+    
 =======================================================
 3️⃣ PROMISES
 =======================================================
 
 A Promise represents:
-
 A value that will exist in the future.
 
 States:
-
 pending
-
 fulfilled
-
 rejected
 
 📌 Creating a Promise
@@ -130,6 +124,7 @@ const myPromise = new Promise((resolve, reject) => {
         reject("Operation failed");
     }
 });
+    
 📌 Consuming a Promise
 myPromise
     .then((data) => {
@@ -140,6 +135,78 @@ myPromise
     });
 ✅ Output:
 Success: Operation successful
+
+
+🧠 Very Deep Backend Question For You
+Which is faster?
+await wait(1000);
+await wait(1000);
+OR
+await Promise.all([wait(1000), wait(1000)]);
+Explain why.
+
+🧪 Case 1 — Sequential Execution
+await wait(1000);
+await wait(1000);
+What happens?
+1️⃣ First wait(1000) runs
+→ waits 1 second
+→ completes
+2️⃣ Second wait(1000) runs
+→ waits 1 second
+→ completes
+⏱ Total Time:
+1s + 1s = 2 seconds
+Because the second one does NOT start until the first finishes.
+This is sequential execution
+🧪 Case 2 — Parallel Execution
+await Promise.all([
+    wait(1000),
+    wait(1000)
+]);
+What happens?
+Both wait(1000) start immediately.
+Timer 1 starts
+Timer 2 starts
+Both run concurrently (non-blocking)
+After 1 second → both complete.
+⏱ Total Time:
+~1 second
+Because they ran in parallel.
+
+
+//imp
+🧠 Why This Matters in Real Backend
+
+Imagine:
+Fetch user from DB → 200ms
+Fetch orders → 300ms
+Fetch notifications → 150ms
+If you do this:
+await getUser();
+await getOrders();
+await getNotifications();
+Total time:
+200 + 300 + 150 = 650ms
+But if independent:
+await Promise.all([
+    getUser(),
+    getOrders(),
+    getNotifications()
+]);
+Total time:
+~300ms (longest one)
+Huge performance improvement.
+
+//imp
+🧠 Very Deep Concept (Important)
+
+Even though JS is single-threaded:
+Promise.all still runs in parallel because:
+I/O is handled by OS/libuv
+Event loop manages completion
+JS thread is not doing the waiting.
+    
 =======================================================
 4️⃣ PROMISE VS setTimeout ORDER (VERY IMPORTANT)
 =======================================================
